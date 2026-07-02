@@ -1,37 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jolly Arbitrage Scanner</title>
-
-  <link rel="stylesheet" href="style.css">
+    <title>Jolly Arbitrage Scanner</title>
 </head>
 
 <body>
 
-<header>
-  <h1>💰 Jolly Arbitrage Scanner</h1>
-  <p>Find the best crypto arbitrage opportunities</p>
-</header>
+<h1>🚀 Jolly Arbitrage Scanner</h1>
 
-<main>
+<p>Scanner Status:
+<span id="status">Loading...</span>
+</p>
 
-  <div id="status">
-    🟢 Scanner Ready
-  </div>
+<h2>Price Comparison</h2>
 
-  <button id="scanBtn">
-    Scan Markets
-  </button>
+<table border="1" cellpadding="10">
+<tr>
+<th>Exchange</th>
+<th>BTC Price (USDT)</th>
+</tr>
 
-  <div id="results">
-    Waiting for first scan...
-  </div>
+<tr>
+<td>Binance</td>
+<td id="binance">Loading...</td>
+</tr>
 
-</main>
+<tr>
+<td>Bybit</td>
+<td id="bybit">Loading...</td>
+</tr>
 
-<script src="app.js"></script>
+</table>
+
+<script>
+
+async function loadPrices(){
+
+const binance=await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
+const b=await binance.json();
+
+const bybit=await fetch("https://api.bybit.com/v5/market/tickers?category=spot&symbol=BTCUSDT");
+const y=await bybit.json();
+
+document.getElementById("binance").innerHTML=b.price;
+
+document.getElementById("bybit").innerHTML=y.result.list[0].lastPrice;
+
+document.getElementById("status").innerHTML="Live";
+
+}
+
+loadPrices();
+
+setInterval(loadPrices,10000);
+
+</script>
 
 </body>
 </html>
