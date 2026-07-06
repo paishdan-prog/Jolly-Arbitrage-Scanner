@@ -1,150 +1,107 @@
+
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Jolly Arbitrage Scanner</title>
+<title>Jolly Arbitrage Scanner PRO</title>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
-
 body{
-
 background:#0f172a;
-
 color:white;
-
+font-family:Arial;
+margin:0;
 padding:20px;
-
 }
 
 .container{
-
-max-width:900px;
-
+max-width:700px;
 margin:auto;
-
-}
-
-.card{
-
 background:#1e293b;
-
 padding:20px;
-
-border-radius:12px;
-
-margin-bottom:20px;
-
-box-shadow:0 0 10px rgba(0,0,0,.3);
-
+border-radius:20px;
 }
 
 h1{
-
 text-align:center;
-
-margin-bottom:10px;
-
+font-size:42px;
 }
 
 .status{
-
 text-align:center;
-
-font-size:18px;
-
+font-size:26px;
 color:#22c55e;
-
 margin-bottom:20px;
+}
 
+.clock{
+text-align:center;
+font-size:20px;
+margin-bottom:20px;
+color:#94a3b8;
 }
 
 table{
-
 width:100%;
-
 border-collapse:collapse;
-
 }
 
 th{
-
 background:#334155;
-
-padding:12px;
-
+padding:15px;
 }
 
 td{
-
-padding:12px;
-
-text-align:center;
-
-border-bottom:1px solid #475569;
-
-}
-
-button{
-
-width:100%;
-
 padding:15px;
-
-font-size:18px;
-
-background:#2563eb;
-
-color:white;
-
-border:none;
-
-border-radius:10px;
-
-cursor:pointer;
-
-margin-top:20px;
-
-}
-
-button:hover{
-
-background:#1d4ed8;
-
+border-bottom:1px solid #475569;
+text-align:center;
 }
 
 .best{
-
-font-size:22px;
-
 text-align:center;
-
+margin-top:30px;
+font-size:28px;
 color:#22c55e;
-
-margin-top:15px;
-
 }
 
-.profit{
-
-font-size:35px;
-
+#recommendation{
+font-size:50px;
 font-weight:bold;
-
 text-align:center;
+margin-top:15px;
+}
 
-margin-top:10px;
+#profit{
+font-size:40px;
+text-align:center;
+margin-top:20px;
+}
+
+button{
+width:100%;
+padding:20px;
+font-size:28px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:12px;
+margin-top:25px;
+}
+
+.loading{
+animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+
+0%{opacity:.4;}
+
+50%{opacity:1;}
+
+100%{opacity:.4;}
 
 }
 
@@ -156,15 +113,13 @@ margin-top:10px;
 
 <div class="container">
 
-<div class="card">
-
-<h1>🚀 Jolly Arbitrage Scanner</h1>
+<h1>🚀 Jolly Arbitrage Scanner PRO</h1>
 
 <div class="status">
-
-🟢 Online
-
+🟢 LIVE
 </div>
+
+<div class="clock" id="clock"></div>
 
 <table>
 
@@ -212,13 +167,19 @@ margin-top:10px;
 
 <div class="best">
 
-🔥 Best Opportunity
+🔥 BEST OPPORTUNITY
 
 </div>
 
-<div id="opportunity" class="profit">
+<div id="recommendation">
 
 Loading...
+
+</div>
+
+<div id="profit">
+
+Calculating...
 
 </div>
 
@@ -226,17 +187,29 @@ Loading...
 
 Refresh Prices
 
-</button>
+</button> </div>
 
-</div> 
 <script>
+
+function updateClock(){
+
+const now = new Date();
+
+document.getElementById("clock").innerHTML =
+now.toLocaleTimeString();
+
+}
+
+setInterval(updateClock,1000);
+
+updateClock();
 
 async function loadPrices(){
 
-// Demo prices for Version 2.
-// We'll replace these with live exchange data next.
+document.getElementById("recommendation").innerHTML="Scanning...";
+document.getElementById("profit").innerHTML="Checking opportunities...";
 
-const prices = {
+const prices={
 
 binance:{
 buy:1595,
@@ -264,41 +237,56 @@ document.getElementById("bybitSell").innerHTML="₦"+prices.bybit.sell;
 document.getElementById("okxBuy").innerHTML="₦"+prices.okx.buy;
 document.getElementById("okxSell").innerHTML="₦"+prices.okx.sell;
 
-// Find best buy
+calculateOpportunity(prices);
 
-let exchanges=[
-{name:"Binance",buy:prices.binance.buy,sell:prices.binance.sell},
-{name:"Bybit",buy:prices.bybit.buy,sell:prices.bybit.sell},
-{name:"OKX",buy:prices.okx.buy,sell:prices.okx.sell}
-];
+}
+
+function calculateOpportunity(data){
+
+let exchanges=[];
+
+for(let name in data){
+
+exchanges.push({
+
+name:name,
+
+buy:data[name].buy,
+
+sell:data[name].sell
+
+});
+
+}
 
 let cheapest=exchanges[0];
 let highest=exchanges[0];
 
-for(let e of exchanges){
+exchanges.forEach(e=>{
 
-if(e.buy<cheapest.buy)
-cheapest=e;
+if(e.buy<cheapest.buy) cheapest=e;
 
-if(e.sell>highest.sell)
-highest=e;
+if(e.sell>highest.sell) highest=e;
 
-}
+});
 
-let spread=highest.sell-cheapest.buy;
+const spread=highest.sell-cheapest.buy;
 
-let percent=((spread/cheapest.buy)*100).toFixed(2);
+const percent=((spread/cheapest.buy)*100).toFixed(2);
 
-document.getElementById("opportunity").innerHTML=
+document.getElementById("recommendation").innerHTML=
 
-`Buy on ${cheapest.name}<br>
-Sell on ${highest.name}<br><br>
-Spread: ₦${spread}<br>
-Profit: ${percent}%`;
+"Buy on <br><b>"+cheapest.name.toUpperCase()+"</b><br>Sell on <br><b>"+highest.name.toUpperCase()+"</b>";
+
+document.getElementById("profit").innerHTML=
+
+"Spread: ₦"+spread+"<br>Profit: "+percent+"%";
 
 }
 
 loadPrices();
+
+setInterval(loadPrices,10000);
 
 </script>
 
